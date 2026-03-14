@@ -4,14 +4,14 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>KJ Back Fee Donation</title>
+<title>KJ Donation Portal</title>
 
 <style>
 
 body{
 margin:0;
 font-family:Segoe UI,Arial;
-background:#0b2c5a;
+background:linear-gradient(180deg,#0b2c5a,#071a33);
 color:white;
 }
 
@@ -19,79 +19,86 @@ color:white;
 /* HEADER */
 
 header{
-background:#071f3f;
-padding:15px;
+background:#061a33;
+padding:16px;
 text-align:center;
-font-size:18px;
 font-weight:bold;
-letter-spacing:1px;
+font-size:18px;
 border-bottom:3px solid gold;
+letter-spacing:1px;
 }
 
 
 /* CARD */
 
 .card{
-background:white;
-color:black;
+
 max-width:380px;
 margin:20px auto;
 padding:20px;
+
+background:rgba(255,255,255,0.95);
+
+color:black;
+
 border-radius:14px;
-box-shadow:0 4px 15px rgba(0,0,0,0.4);
+
+box-shadow:0 6px 20px rgba(0,0,0,0.5);
+
 }
 
 
 /* INPUT */
 
 input{
+
 width:100%;
 padding:10px;
 margin:6px 0;
-border-radius:6px;
+
+border-radius:8px;
 border:1px solid #ccc;
+
 font-size:14px;
+
 }
 
 
 /* BUTTON */
 
 button{
+
 width:100%;
 padding:12px;
-background:gold;
+
+border-radius:8px;
 border:0;
-border-radius:6px;
+
 font-weight:bold;
-font-size:15px;
+
+margin-top:8px;
+
 cursor:pointer;
-}
 
-button:hover{
-background:#ffd700;
 }
 
 
-/* LINK BOX */
+.genBtn{
+background:gold;
+}
 
-#linkBox{
-word-break:break-all;
-font-size:12px;
-margin-top:10px;
-color:#002b5c;
+.copyBtn{
+background:#0b2c5a;
+color:white;
 }
 
 
-/* DONATION CARD */
-
-.donateCard{
-text-align:center;
-}
+/* DONATION */
 
 img{
 width:220px;
 margin-top:10px;
-border-radius:8px;
+border-radius:10px;
 }
 
 
@@ -111,26 +118,42 @@ opacity:0.7;
 <body>
 
 <header>
+
 KRISTU JAYANTI BACK FEE DONATION PORTAL
+
 </header>
 
 
-<!-- CREATE LINK -->
 
 <div class="card" id="formBox">
 
 <h3>Create Donation Link</h3>
 
-<input id="name" placeholder="Student Name">
+<input id="name" placeholder="Name">
 
-<input id="roll" placeholder="Roll Number">
+<input id="roll" placeholder="Roll">
 
-<input id="sub" placeholder="Failed Subject">
+<input id="sub" placeholder="Subject">
 
-<label>Upload QR</label>
+<input id="upi" placeholder="UPI ID (optional)">
+
+<label>Upload QR (optional)</label>
+
 <input type="file" id="qrFile">
 
-<button onclick="makeLink()">Generate Link</button>
+
+<button class="genBtn" onclick="makeLink()">
+
+Generate Link
+
+</button>
+
+<button class="copyBtn" onclick="copyLink()">
+
+Copy Link
+
+</button>
+
 
 <div id="linkBox"></div>
 
@@ -138,14 +161,15 @@ KRISTU JAYANTI BACK FEE DONATION PORTAL
 
 
 
-<!-- DONATION PAGE -->
 
-<div class="card donateCard" id="donateBox" style="display:none">
+<div class="card" id="donateBox" style="display:none">
 
 <h2 id="dname"></h2>
 
 <div id="droll"></div>
 <div id="dsub"></div>
+
+<div id="dupi"></div>
 
 <img id="qr">
 
@@ -154,7 +178,9 @@ KRISTU JAYANTI BACK FEE DONATION PORTAL
 
 
 <footer>
+
 Kristu Jayanti Student Support Portal
+
 </footer>
 
 
@@ -162,12 +188,12 @@ Kristu Jayanti Student Support Portal
 <script>
 
 let qrData=""
+let finalLink=""
 
-// upload QR
 
 document.getElementById("qrFile").onchange=function(e){
 
-let file=e.target.files[0]
+let f=e.target.files[0]
 
 let reader=new FileReader()
 
@@ -177,38 +203,58 @@ qrData=reader.result
 
 }
 
-reader.readAsDataURL(file)
+reader.readAsDataURL(f)
 
 }
 
 
-
-// generate link
 
 function makeLink(){
 
 let name=document.getElementById("name").value
 let roll=document.getElementById("roll").value
 let sub=document.getElementById("sub").value
+let upi=document.getElementById("upi").value
 
-let url=
+
+if(!qrData && upi){
+
+qrData=
+"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa="+upi
+
+}
+
+
+finalLink=
 location.origin+
 location.pathname+
 "?name="+encodeURIComponent(name)+
 "&roll="+encodeURIComponent(roll)+
 "&sub="+encodeURIComponent(sub)+
+"&upi="+encodeURIComponent(upi)+
 "&qr="+encodeURIComponent(qrData)
 
-document.getElementById("linkBox").innerText=url
+
+document.getElementById("linkBox").innerText=finalLink
 
 }
 
 
 
-// read params
+function copyLink(){
+
+navigator.clipboard.writeText(finalLink)
+
+alert("Link copied")
+
+}
+
+
 
 function get(n){
+
 return new URLSearchParams(location.search).get(n)
+
 }
 
 
@@ -222,6 +268,7 @@ document.getElementById("donateBox").style.display="block"
 document.getElementById("dname").innerText=name
 document.getElementById("droll").innerText="Roll: "+get("roll")
 document.getElementById("dsub").innerText="Subject: "+get("sub")
+document.getElementById("dupi").innerText="UPI: "+get("upi")
 
 document.getElementById("qr").src=get("qr")
 
