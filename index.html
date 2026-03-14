@@ -10,8 +10,8 @@
 
 body{
 margin:0;
-font-family:Segoe UI,Arial;
-background:linear-gradient(180deg,#0b2c5a,#071a33);
+font-family:Segoe UI;
+background:linear-gradient(#0b2c5a,#071a33);
 color:white;
 }
 
@@ -20,96 +20,108 @@ color:white;
 
 header{
 background:#061a33;
-padding:16px;
+padding:15px;
 text-align:center;
 font-weight:bold;
-font-size:18px;
 border-bottom:3px solid gold;
-letter-spacing:1px;
+}
+
+
+/* INFO */
+
+.info{
+max-width:380px;
+margin:10px auto;
+font-size:13px;
+opacity:.9;
+text-align:center;
 }
 
 
 /* CARD */
 
 .card{
-
 max-width:380px;
-margin:20px auto;
+margin:15px auto;
 padding:20px;
-
-background:rgba(255,255,255,0.95);
-
+background:white;
 color:black;
-
 border-radius:14px;
-
-box-shadow:0 6px 20px rgba(0,0,0,0.5);
-
+box-shadow:0 5px 20px rgba(0,0,0,.4);
 }
 
 
-/* INPUT */
-
 input{
-
 width:100%;
 padding:10px;
 margin:6px 0;
-
 border-radius:8px;
 border:1px solid #ccc;
-
-font-size:14px;
-
 }
 
-
-/* BUTTON */
 
 button{
-
 width:100%;
 padding:12px;
-
-border-radius:8px;
 border:0;
-
+border-radius:8px;
 font-weight:bold;
-
 margin-top:8px;
-
 cursor:pointer;
-
 }
 
 
-.genBtn{
+.gen{
 background:gold;
 }
 
-.copyBtn{
+.copy{
 background:#0b2c5a;
 color:white;
 }
 
 
-/* DONATION */
+/* spinner */
+
+.loader{
+display:none;
+margin:auto;
+border:4px solid #eee;
+border-top:4px solid gold;
+border-radius:50%;
+width:30px;
+height:30px;
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+0%{transform:rotate(0)}
+100%{transform:rotate(360deg)}
+}
+
+
+/* progress */
+
+.progress{
+height:6px;
+background:#ddd;
+border-radius:5px;
+overflow:hidden;
+display:none;
+}
+
+.bar{
+height:100%;
+width:0%;
+background:gold;
+}
+
 
 img{
-width:220px;
+width:200px;
 margin-top:10px;
-border-radius:10px;
 }
 
-
-/* FOOTER */
-
-footer{
-text-align:center;
-font-size:12px;
-padding:10px;
-opacity:0.7;
-}
 
 </style>
 
@@ -117,11 +129,21 @@ opacity:0.7;
 
 <body>
 
+
 <header>
 
 KRISTU JAYANTI BACK FEE DONATION PORTAL
 
 </header>
+
+
+<div class="info">
+
+Generate donation link using QR or UPI<br>
+Share link with friends for support<br>
+Use small image for best result
+
+</div>
 
 
 
@@ -135,20 +157,27 @@ KRISTU JAYANTI BACK FEE DONATION PORTAL
 
 <input id="sub" placeholder="Subject">
 
-<input id="upi" placeholder="UPI ID (optional)">
+<input id="upi" placeholder="UPI (optional)">
 
-<label>Upload QR (optional)</label>
-
+Upload QR
 <input type="file" id="qrFile">
 
 
-<button class="genBtn" onclick="makeLink()">
+<div class="progress">
+<div class="bar" id="bar"></div>
+</div>
+
+
+<div class="loader" id="loader"></div>
+
+
+<button class="gen" onclick="makeLink()">
 
 Generate Link
 
 </button>
 
-<button class="copyBtn" onclick="copyLink()">
+<button class="copy" onclick="copyLink()">
 
 Copy Link
 
@@ -161,14 +190,12 @@ Copy Link
 
 
 
-
 <div class="card" id="donateBox" style="display:none">
 
 <h2 id="dname"></h2>
 
 <div id="droll"></div>
 <div id="dsub"></div>
-
 <div id="dupi"></div>
 
 <img id="qr">
@@ -177,39 +204,83 @@ Copy Link
 
 
 
-<footer>
-
-Kristu Jayanti Student Support Portal
-
-</footer>
-
-
-
 <script>
 
 let qrData=""
 let finalLink=""
 
+let progress=document.querySelector(".progress")
+let bar=document.getElementById("bar")
+let loader=document.getElementById("loader")
 
-document.getElementById("qrFile").onchange=function(e){
 
-let f=e.target.files[0]
+
+// resize image
+
+function compressImage(file,callback){
+
+progress.style.display="block"
 
 let reader=new FileReader()
 
-reader.onload=function(){
+reader.onload=function(e){
 
-qrData=reader.result
+let img=new Image()
+
+img.onload=function(){
+
+let canvas=document.createElement("canvas")
+
+let size=200
+
+canvas.width=size
+canvas.height=size
+
+let ctx=canvas.getContext("2d")
+
+ctx.drawImage(img,0,0,size,size)
+
+qrData=canvas.toDataURL("image/jpeg",0.5)
+
+progress.style.display="none"
+
+callback()
 
 }
 
-reader.readAsDataURL(f)
+img.src=e.target.result
+
+}
+
+reader.readAsDataURL(file)
 
 }
 
 
+
+// upload
+
+document.getElementById("qrFile").onchange=function(e){
+
+let file=e.target.files[0]
+
+bar.style.width="30%"
+
+compressImage(file,function(){
+
+bar.style.width="100%"
+
+})
+
+}
+
+
+
+// generate
 
 function makeLink(){
+
+loader.style.display="block"
 
 let name=document.getElementById("name").value
 let roll=document.getElementById("roll").value
@@ -225,7 +296,10 @@ qrData=
 }
 
 
+setTimeout(function(){
+
 finalLink=
+
 location.origin+
 location.pathname+
 "?name="+encodeURIComponent(name)+
@@ -237,19 +311,27 @@ location.pathname+
 
 document.getElementById("linkBox").innerText=finalLink
 
+loader.style.display="none"
+
+},500)
+
 }
 
 
+
+// copy
 
 function copyLink(){
 
 navigator.clipboard.writeText(finalLink)
 
-alert("Link copied")
+alert("Copied")
 
 }
 
 
+
+// params
 
 function get(n){
 
@@ -275,7 +357,6 @@ document.getElementById("qr").src=get("qr")
 }
 
 </script>
-
 
 </body>
 </html>
