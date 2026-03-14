@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>KJ Back Fee Donation</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI,Arial;
+background:#0b2c5a;
+color:white;
+}
+
+
+/* HEADER */
+
+header{
+background:#071f3f;
+padding:15px;
+text-align:center;
+font-size:18px;
+font-weight:bold;
+letter-spacing:1px;
+border-bottom:3px solid gold;
+}
+
+
+/* CARD */
+
+.card{
+background:white;
+color:black;
+max-width:380px;
+margin:20px auto;
+padding:20px;
+border-radius:14px;
+box-shadow:0 4px 15px rgba(0,0,0,0.4);
+}
+
+
+/* INPUT */
+
+input{
+width:100%;
+padding:10px;
+margin:6px 0;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:14px;
+}
+
+
+/* BUTTON */
+
+button{
+width:100%;
+padding:12px;
+background:gold;
+border:0;
+border-radius:6px;
+font-weight:bold;
+font-size:15px;
+cursor:pointer;
+}
+
+button:hover{
+background:#ffd700;
+}
+
+
+/* LINK BOX */
+
+#linkBox{
+word-break:break-all;
+font-size:12px;
+margin-top:10px;
+color:#002b5c;
+}
+
+
+/* DONATION CARD */
+
+.donateCard{
+text-align:center;
+}
+
+img{
+width:220px;
+margin-top:10px;
+border-radius:8px;
+}
+
+
+/* FOOTER */
+
+footer{
+text-align:center;
+font-size:12px;
+padding:10px;
+opacity:0.7;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+KRISTU JAYANTI BACK FEE DONATION PORTAL
+</header>
+
+
+<!-- CREATE LINK -->
+
+<div class="card" id="formBox">
+
+<h3>Create Donation Link</h3>
+
+<input id="name" placeholder="Student Name">
+
+<input id="roll" placeholder="Roll Number">
+
+<input id="sub" placeholder="Failed Subject">
+
+<label>Upload QR</label>
+<input type="file" id="qrFile">
+
+<button onclick="makeLink()">Generate Link</button>
+
+<div id="linkBox"></div>
+
+</div>
+
+
+
+<!-- DONATION PAGE -->
+
+<div class="card donateCard" id="donateBox" style="display:none">
+
+<h2 id="dname"></h2>
+
+<div id="droll"></div>
+<div id="dsub"></div>
+
+<img id="qr">
+
+</div>
+
+
+
+<footer>
+Kristu Jayanti Student Support Portal
+</footer>
+
+
+
+<script>
+
+let qrData=""
+
+// upload QR
+
+document.getElementById("qrFile").onchange=function(e){
+
+let file=e.target.files[0]
+
+let reader=new FileReader()
+
+reader.onload=function(){
+
+qrData=reader.result
+
+}
+
+reader.readAsDataURL(file)
+
+}
+
+
+
+// generate link
+
+function makeLink(){
+
+let name=document.getElementById("name").value
+let roll=document.getElementById("roll").value
+let sub=document.getElementById("sub").value
+
+let url=
+location.origin+
+location.pathname+
+"?name="+encodeURIComponent(name)+
+"&roll="+encodeURIComponent(roll)+
+"&sub="+encodeURIComponent(sub)+
+"&qr="+encodeURIComponent(qrData)
+
+document.getElementById("linkBox").innerText=url
+
+}
+
+
+
+// read params
+
+function get(n){
+return new URLSearchParams(location.search).get(n)
+}
+
+
+let name=get("name")
+
+if(name){
+
+document.getElementById("formBox").style.display="none"
+document.getElementById("donateBox").style.display="block"
+
+document.getElementById("dname").innerText=name
+document.getElementById("droll").innerText="Roll: "+get("roll")
+document.getElementById("dsub").innerText="Subject: "+get("sub")
+
+document.getElementById("qr").src=get("qr")
+
+}
+
+</script>
+
+
+</body>
+</html>
